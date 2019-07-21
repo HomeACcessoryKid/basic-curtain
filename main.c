@@ -172,8 +172,8 @@ void button_callback(uint8_t gpio, button_event_t event) {
 
 void motor_init() {
     if (button_create(BUTTON_PIN, button_callback)) UDPLGP("Failed to initialize button\n");
-    gpio_enable(MOVE_PIN, GPIO_OUTPUT);
-    gpio_enable( DIR_PIN, GPIO_OUTPUT);
+    gpio_enable(MOVE_PIN, GPIO_OUTPUT); gpio_write(MOVE_PIN, 0);
+    gpio_enable( DIR_PIN, GPIO_OUTPUT); gpio_write( DIR_PIN, 0);
     intervalk=100*BEAT/transittime;
     xTaskCreate(state_task, "State", 512, NULL, 1, NULL);
 }
@@ -222,7 +222,7 @@ void user_init(void) {
     
     int c_hash=ota_read_sysparam(&manufacturer.value.string_value,&serial.value.string_value,
                                       &model.value.string_value,&revision.value.string_value);
-    c_hash=3; revision.value.string_value="0.0.3"; //cheat line
+    //c_hash=3; revision.value.string_value="0.0.3"; //cheat line
     config.accessories[0]->config_number=c_hash;
     
     homekit_server_init(&config);

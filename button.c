@@ -45,7 +45,7 @@ void button_intr_callback(uint8_t gpio) {
     }
 
     button->last_event_time = now;
-    if (gpio_read(button->gpio_num) == 1) {
+    if (gpio_read(button->gpio_num) == 0) {
         button->last_press_time = now;
     } else {
         if ((now - button->last_press_time)*portTICK_PERIOD_MS > button->long_press_time) {
@@ -88,9 +88,9 @@ int button_create(const uint8_t gpio_num, button_callback_fn callback) {
     button->callback = callback;
 
     // times in milliseconds
-    button->debounce_time = 150;
-    button->long_press_time = 1000;
-    button->double_press_time = 500;
+    button->debounce_time = 50;
+    button->long_press_time = 500;
+    button->double_press_time = 300;
 
     button->next = buttons;
     buttons = button;
