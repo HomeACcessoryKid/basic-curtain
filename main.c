@@ -124,7 +124,7 @@ void state_task(void *argv) {
     currentk=current.value.int_value*1000;
     while(1) {
         vTaskDelay(BEAT/portTICK_PERIOD_MS);
-        UDPLGP("Dk=%7d, Ck=%7d, C=%3d, T=%3d, S=%d, move=%d, dir=%2d\n",deltak,currentk,current.value.int_value,target.value.int_value,state.value.int_value,move,direction);
+        UDPLOG("Dk=%7d, Ck=%7d, C=%3d, T=%3d, S=%d, move=%d, dir=%2d\n",deltak,currentk,current.value.int_value,target.value.int_value,state.value.int_value,move,direction);
         if (current.value.int_value!=target.value.int_value) { //need to move
             direction=current.value.int_value<target.value.int_value ? 1 : -1;
             deltak=target.value.int_value*1000-currentk;
