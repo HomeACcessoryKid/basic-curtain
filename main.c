@@ -99,7 +99,7 @@ void transit_set(homekit_value_t value) {
         UDPLGP("Invalid transit-value format: %d\n", value.format);
         return;
     }
-    transittime = value.int_value;
+    transittime = value.int_value; //TODO store as sysparam
     UDPLGP("Transit: %d\n", transittime);
     intervalk=100*BEAT/transittime; //unit is 0.001% because BEAT is in ms and transittime in s
 }
@@ -124,7 +124,7 @@ void state_task(void *argv) {
     currentk=current.value.int_value*1000;
     while(1) {
         vTaskDelay(BEAT/portTICK_PERIOD_MS);
-        UDPLOG("Dk=%7d, Ck=%7d, C=%3d, T=%3d, S=%d, move=%d, dir=%2d\n",deltak,currentk,current.value.int_value,target.value.int_value,state.value.int_value,move,direction);
+        UDPLOG("T=%3d, C=%3d, Ck=%7d, S=%d, move=%d, dir=%2d\n",target.value.int_value,current.value.int_value,currentk,state.value.int_value,move,direction);
         if (current.value.int_value!=target.value.int_value) { //need to move
             direction=current.value.int_value<target.value.int_value ? 1 : -1;
             deltak=target.value.int_value*1000-currentk;
@@ -135,6 +135,7 @@ void state_task(void *argv) {
             homekit_characteristic_notify(&state,  HOMEKIT_UINT8(  state.value.int_value));
             homekit_characteristic_notify(&current,HOMEKIT_UINT8(current.value.int_value));
         } else { //arrived
+            if (target.value.int_value==100 || target.value.int_value==0) vTaskDelay(2000/portTICK_PERIOD_MS);
             move=0;
             direction=0;
             if (state.value.int_value!=2){
@@ -151,18 +152,18 @@ void state_task(void *argv) {
 void button_callback(uint8_t gpio, button_event_t event) {
     switch (event) {
         case button_event_single_press:
-            UDPLGP("single press\n");
-            target.value.int_value=0;//set target=0
+            UDPLGP("single press=stop here\n");
+            target.value.int_value=current.value.int_value;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         case button_event_double_press:
-            UDPLGP("double press\n");
-            target.value.int_value=100;//set target=100
+            UDPLGP("double press=go open\n");
+            target.value.int_value=100;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         case button_event_long_press:
-            UDPLGP("long press\n");
-            target.value.int_value=current.value.int_value;//set target=current
+            UDPLGP("long press=go close\n");
+            target.value.int_value=0;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         default:
@@ -216,7 +217,7 @@ homekit_server_config_t config = {
 void user_init(void) {
     uart_set_baud(0, 230400);
     udplog_init(3);
-    UDPLOG("\n\n\n\nBasic Curtain Motor\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.1.0\n");
 
     motor_init();
     
