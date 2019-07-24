@@ -135,7 +135,9 @@ void state_task(void *argv) {
             homekit_characteristic_notify(&state,  HOMEKIT_UINT8(  state.value.int_value));
             homekit_characteristic_notify(&current,HOMEKIT_UINT8(current.value.int_value));
         } else { //arrived
-            if (target.value.int_value==100 || target.value.int_value==0) vTaskDelay(2000/portTICK_PERIOD_MS);
+            if (move && (target.value.int_value==100 || target.value.int_value==0)) {
+                vTaskDelay(transittime*100/portTICK_PERIOD_MS); //add 10% of transittime to runtime
+            }
             move=0;
             direction=0;
             if (state.value.int_value!=2){
@@ -217,7 +219,7 @@ homekit_server_config_t config = {
 void user_init(void) {
     uart_set_baud(0, 230400);
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.1.0\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.1.1\n");
 
     motor_init();
     

@@ -90,7 +90,7 @@ int button_create(const uint8_t gpio_num, button_callback_fn callback) {
     // times in milliseconds
     button->debounce_time = 50;
     button->long_press_time = 500;
-    button->double_press_time = 300;
+    button->double_press_time = 500;
 
     button->next = buttons;
     buttons = button;
