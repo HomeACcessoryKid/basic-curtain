@@ -1,8 +1,8 @@
-/*  (c) 2018 HomeAccessoryKid
+/*  (c) 2019 HomeAccessoryKid
  *  This example drives a basic curtain motor.
  *  It uses any ESP8266 with as little as 1MB flash. 
  *  GPIO-0 reads a button for manual instructions
- *  GPIO-2 instructs a relay to drive the motor
+ *  GPIO-5 instructs a relay to drive the motor
  *  GPIO-4 instructs the direction=polarity of the motor by means of two relays: up or down
  *  obviously your own motor setup might be using different ways of providing these functions
  *  a HomeKit custom integer value can be set to define the time needed for 100% travel
@@ -219,7 +219,7 @@ homekit_server_config_t config = {
 void user_init(void) {
     uart_set_baud(0, 230400);
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.1.1\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.1.2\n");
 
     motor_init();
     

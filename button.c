@@ -45,6 +45,8 @@ void button_intr_callback(uint8_t gpio) {
     }
 
     button->last_event_time = now;
+#include <udplogger.h>
+UDPLOG("[%d-%d] ",button->last_event_time,gpio_read(button->gpio_num));
     if (gpio_read(button->gpio_num) == 0) {
         button->last_press_time = now;
     } else {
@@ -89,7 +91,7 @@ int button_create(const uint8_t gpio_num, button_callback_fn callback) {
 
     // times in milliseconds
     button->debounce_time = 50;
-    button->long_press_time = 500;
+    button->long_press_time = 600;
     button->double_press_time = 500;
 
     button->next = buttons;
