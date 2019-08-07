@@ -219,7 +219,7 @@ homekit_server_config_t config = {
 void user_init(void) {
     uart_set_baud(0, 230400);
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.1.2\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.1.3\n");
 
     motor_init();
     

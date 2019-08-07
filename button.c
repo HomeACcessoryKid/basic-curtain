@@ -39,14 +39,14 @@ void button_intr_callback(uint8_t gpio) {
         return;
 
     uint32_t now = xTaskGetTickCountFromISR();
+#include <udplogger.h>
+UDPLOG("[%d0-%d] ",button->last_event_time,gpio_read(button->gpio_num));
     if ((now - button->last_event_time)*portTICK_PERIOD_MS < button->debounce_time) {
         // debounce time, ignore events
         return;
     }
 
     button->last_event_time = now;
-#include <udplogger.h>
-UDPLOG("[%d-%d] ",button->last_event_time,gpio_read(button->gpio_num));
     if (gpio_read(button->gpio_num) == 0) {
         button->last_press_time = now;
     } else {
