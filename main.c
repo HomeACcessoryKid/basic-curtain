@@ -165,8 +165,8 @@ void button_callback(uint8_t gpio, button_event_t event) {
             break;
         case button_event_long_press:
             UDPLGP("long press=go close\n");
-            target.value.int_value=0;
-            homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
+//             target.value.int_value=0;
+//             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         default:
             UDPLGP("unknown button event: %d\n", event);
@@ -219,7 +219,7 @@ homekit_server_config_t config = {
 void user_init(void) {
     uart_set_baud(0, 230400);
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.1.3\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.1.4\n");
 
     motor_init();
     
