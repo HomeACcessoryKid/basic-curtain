@@ -37,7 +37,7 @@
 #error DIR_PIN is not specified
 #endif
 
-#define BEAT 500  //ms
+#define BEAT 250  //ms
 
 /* ============== BEGIN HOMEKIT CHARACTERISTIC DECLARATIONS =============================================================== */
 int transittime=14, intervalk;
@@ -225,13 +225,13 @@ homekit_server_config_t config = {
 
 void on_wifi_ready() {
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.3.0\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.3.1\n");
 
     motor_init();
     
     int c_hash=ota_read_sysparam(&manufacturer.value.string_value,&serial.value.string_value,
                                       &model.value.string_value,&revision.value.string_value);
-    //c_hash=3; revision.value.string_value="0.3.0"; //cheat line
+    //c_hash=3; revision.value.string_value="0.3.1"; //cheat line
     config.accessories[0]->config_number=c_hash;
     
     homekit_server_init(&config);
