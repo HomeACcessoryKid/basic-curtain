@@ -7,3 +7,9 @@
 [submodule "esp-cjson"]
 	path = esp-cjson
 	url = https://github.com/HomeACcessoryKid/esp-cjson
+[submodule "esp-button"]
+	path = esp-button
+	url = https://github.com/HomeACcessoryKid/esp-button
+[submodule "esp-wifi-config"]
+	path = esp-wifi-config
+	url = https://github.com/HomeACcessoryKid/esp-wifi-config

@@ -23,9 +23,10 @@
 #include <homekit/characteristics.h>
 #include <string.h>
 #include "lwip/api.h"
-
+#include <wifi_config.h>
 #include <udplogger.h>
-#include "button.h"
+#include <button.h>
+
 #ifndef BUTTON_PIN
 #error BUTTON_PIN is not specified
 #endif
@@ -61,9 +62,9 @@ homekit_characteristic_t revision     = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISIO
 
 homekit_value_t target_get();
 void target_set(homekit_value_t value);
-homekit_characteristic_t target       = HOMEKIT_CHARACTERISTIC_(TARGET_POSITION,  0, .getter=target_get, .setter=target_set);
-homekit_characteristic_t current      = HOMEKIT_CHARACTERISTIC_(CURRENT_POSITION, 0);
-homekit_characteristic_t state        = HOMEKIT_CHARACTERISTIC_(POSITION_STATE,   2);
+homekit_characteristic_t target       = HOMEKIT_CHARACTERISTIC_(TARGET_POSITION,   0, .getter=target_get, .setter=target_set);
+homekit_characteristic_t current      = HOMEKIT_CHARACTERISTIC_(CURRENT_POSITION,100                                        );
+homekit_characteristic_t state        = HOMEKIT_CHARACTERISTIC_(POSITION_STATE,    2                                        );
 
 
 homekit_value_t target_get() {
@@ -119,12 +120,16 @@ void identify(homekit_value_t _value) {
 
 void state_task(void *argv) {
     int direction=0,move=0,currentk,deltak=0;
+    char status_line[50], previous_status[50];
     
     vTaskDelay(500); //TODO prevent that this works before homekit is initialized
     currentk=current.value.int_value*1000;
     while(1) {
         vTaskDelay(BEAT/portTICK_PERIOD_MS);
-        UDPLOG("T=%3d, C=%3d, Ck=%7d, S=%d, move=%d, dir=%2d\n",target.value.int_value,current.value.int_value,currentk,state.value.int_value,move,direction);
+        sprintf(status_line,"T=%3d, C=%3d, Ck=%7d, S=%d, move=%d, dir=%2d",
+                            target.value.int_value,current.value.int_value,currentk,state.value.int_value,move,direction);
+        if (strcmp(status_line, previous_status)) UDPLOG("%s @%9d0 ms\n",status_line,xTaskGetTickCount());
+        strcpy(previous_status,status_line);
         if (current.value.int_value!=target.value.int_value) { //need to move
             direction=current.value.int_value<target.value.int_value ? 1 : -1;
             deltak=target.value.int_value*1000-currentk;
@@ -151,22 +156,22 @@ void state_task(void *argv) {
     }
 }
 
-void button_callback(uint8_t gpio, button_event_t event) {
+void button_callback(button_event_t event, void* context) {
     switch (event) {
         case button_event_single_press:
-            UDPLGP("single press=stop here\n");
+            UDPLGP("single press = stop here\n");
             target.value.int_value=current.value.int_value;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         case button_event_double_press:
-            UDPLGP("double press=go open\n");
+            UDPLGP("double press = go open\n");
             target.value.int_value=100;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         case button_event_long_press:
-            UDPLGP("long press=go close\n");
-//             target.value.int_value=0;
-//             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
+            UDPLGP("long press = go close\n");
+            target.value.int_value=0;
+            homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
             break;
         default:
             UDPLGP("unknown button event: %d\n", event);
@@ -174,7 +179,12 @@ void button_callback(uint8_t gpio, button_event_t event) {
 }
 
 void motor_init() {
-    if (button_create(BUTTON_PIN, button_callback)) UDPLGP("Failed to initialize button\n");
+    button_config_t button_config = BUTTON_CONFIG(
+        .debounce_time = 20,
+        .long_press_time = 600,
+        .double_press_time = 500,
+    );
+    if (button_create(BUTTON_PIN, button_config, button_callback, NULL)) UDPLGP("Failed to initialize button\n");
     gpio_enable(MOVE_PIN, GPIO_OUTPUT); gpio_write(MOVE_PIN, 0);
     gpio_enable( DIR_PIN, GPIO_OUTPUT); gpio_write( DIR_PIN, 0);
     intervalk=100*BEAT/transittime;
@@ -216,17 +226,21 @@ homekit_server_config_t config = {
     .password = "111-11-111"
 };
 
-void user_init(void) {
-    uart_set_baud(0, 230400);
+void on_wifi_ready() {
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.1.4\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.2.0\n");
 
     motor_init();
     
     int c_hash=ota_read_sysparam(&manufacturer.value.string_value,&serial.value.string_value,
                                       &model.value.string_value,&revision.value.string_value);
-    //c_hash=3; revision.value.string_value="0.0.3"; //cheat line
+    //c_hash=3; revision.value.string_value="0.2.0"; //cheat line
     config.accessories[0]->config_number=c_hash;
     
     homekit_server_init(&config);
+}
+
+void user_init(void) {
+    uart_set_baud(0, 230400);
+    wifi_config_init("basic-curtain", NULL, on_wifi_ready);
 }

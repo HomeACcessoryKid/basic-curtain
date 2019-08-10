@@ -2,11 +2,14 @@ PROGRAM = main
 
 EXTRA_COMPONENTS = \
 	extras/http-parser \
+	extras/dhcpserver \
 	extras/rboot-ota \
 	$(abspath esp-wolfssl) \
 	$(abspath esp-cjson) \
-	$(abspath esp-homekit)
-
+	$(abspath esp-homekit) \
+    $(abspath esp-wifi-config) \
+    $(abspath esp-button)
+    
 FLASH_SIZE ?= 8
 HOMEKIT_SPI_FLASH_BASE_ADDR ?= 0x8C000
 
