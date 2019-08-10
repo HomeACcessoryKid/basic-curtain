@@ -13,3 +13,6 @@
 [submodule "esp-wifi-config"]
 	path = esp-wifi-config
 	url = https://github.com/HomeACcessoryKid/esp-wifi-config
+[submodule "esp-adv-button"]
+	path = esp-adv-button
+	url = https://github.com/HomeACcessoryKid/esp-adv-button
