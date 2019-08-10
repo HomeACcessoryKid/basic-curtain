@@ -8,7 +8,7 @@ EXTRA_COMPONENTS = \
 	$(abspath esp-cjson) \
 	$(abspath esp-homekit) \
     $(abspath esp-wifi-config) \
-    $(abspath esp-button)
+    $(abspath esp-adv-button)
     
 FLASH_SIZE ?= 8
 HOMEKIT_SPI_FLASH_BASE_ADDR ?= 0x8C000

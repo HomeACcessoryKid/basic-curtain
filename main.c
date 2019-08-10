@@ -25,7 +25,7 @@
 #include "lwip/api.h"
 #include <wifi_config.h>
 #include <udplogger.h>
-#include <button.h>
+#include <adv_button.h>
 
 #ifndef BUTTON_PIN
 #error BUTTON_PIN is not specified
@@ -156,35 +156,32 @@ void state_task(void *argv) {
     }
 }
 
-void button_callback(button_event_t event, void* context) {
-    switch (event) {
-        case button_event_single_press:
+void singlepress_callback(uint8_t gpio, void *args) {
             UDPLGP("single press = stop here\n");
             target.value.int_value=current.value.int_value;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
-            break;
-        case button_event_double_press:
+}
+
+void doublepress_callback(uint8_t gpio, void *args) {
             UDPLGP("double press = go open\n");
             target.value.int_value=100;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
-            break;
-        case button_event_long_press:
+}
+
+void longpress_callback(uint8_t gpio, void *args) {
             UDPLGP("long press = go close\n");
             target.value.int_value=0;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
-            break;
-        default:
-            UDPLGP("unknown button event: %d\n", event);
-    }
 }
 
+
 void motor_init() {
-    button_config_t button_config = BUTTON_CONFIG(
-        .debounce_time = 20,
-        .long_press_time = 600,
-        .double_press_time = 500,
-    );
-    if (button_create(BUTTON_PIN, button_config, button_callback, NULL)) UDPLGP("Failed to initialize button\n");
+    adv_button_set_evaluate_delay(10);
+    adv_button_create(BUTTON_PIN, true, false);
+    adv_button_register_callback_fn(BUTTON_PIN, singlepress_callback, 1, NULL);
+    adv_button_register_callback_fn(BUTTON_PIN, doublepress_callback, 2, NULL);
+    adv_button_register_callback_fn(BUTTON_PIN, longpress_callback, 3, NULL);
+
     gpio_enable(MOVE_PIN, GPIO_OUTPUT); gpio_write(MOVE_PIN, 0);
     gpio_enable( DIR_PIN, GPIO_OUTPUT); gpio_write( DIR_PIN, 0);
     intervalk=100*BEAT/transittime;
@@ -228,13 +225,13 @@ homekit_server_config_t config = {
 
 void on_wifi_ready() {
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.2.0\n");
+    UDPLOG("\n\n\nBasic Curtain Motor 0.3.0\n");
 
     motor_init();
     
     int c_hash=ota_read_sysparam(&manufacturer.value.string_value,&serial.value.string_value,
                                       &model.value.string_value,&revision.value.string_value);
-    //c_hash=3; revision.value.string_value="0.2.0"; //cheat line
+    //c_hash=3; revision.value.string_value="0.3.0"; //cheat line
     config.accessories[0]->config_number=c_hash;
     
     homekit_server_init(&config);
