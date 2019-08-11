@@ -8,6 +8,7 @@ EXTRA_COMPONENTS = \
 	$(abspath esp-cjson) \
 	$(abspath esp-homekit) \
     $(abspath esp-wifi-config) \
+	$(abspath UDPlogger) \
     $(abspath esp-adv-button)
     
 FLASH_SIZE ?= 8

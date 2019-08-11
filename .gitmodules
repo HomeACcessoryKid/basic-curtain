@@ -13,3 +13,6 @@
 [submodule "esp-adv-button"]
 	path = esp-adv-button
 	url = https://github.com/HomeACcessoryKid/esp-adv-button
+[submodule "UDPlogger"]
+	path = UDPlogger
+	url = https://github.com/HomeACcessoryKid/UDPlogger
