@@ -72,10 +72,10 @@ homekit_value_t target_get() {
 }
 void target_set(homekit_value_t value) {
     if (value.format != homekit_format_uint8) {
-        UDPLGP("Invalid target-value format: %d\n", value.format);
+        UDPLUS("Invalid target-value format: %d\n", value.format);
         return;
     }
-    UDPLGP("T:%3d\n",value.int_value);
+    UDPLUS("T:%3d\n",value.int_value);
     target.value=value;
 }
 
@@ -97,11 +97,11 @@ homekit_value_t transit_get() {
 }
 void transit_set(homekit_value_t value) {
     if (value.format != homekit_format_uint8) {
-        UDPLGP("Invalid transit-value format: %d\n", value.format);
+        UDPLUS("Invalid transit-value format: %d\n", value.format);
         return;
     }
     transittime = value.int_value; //TODO store as sysparam
-    UDPLGP("Transit: %d\n", transittime);
+    UDPLUS("Transit: %d\n", transittime);
     intervalk=100*BEAT/transittime; //unit is 0.001% because BEAT is in ms and transittime in s
 }
 homekit_characteristic_t transit=HOMEKIT_CHARACTERISTIC_(CUSTOM_TRANSIT,0,.getter=transit_get,.setter=transit_set);
@@ -111,7 +111,7 @@ homekit_characteristic_t transit=HOMEKIT_CHARACTERISTIC_(CUSTOM_TRANSIT,0,.gette
 // }
 
 void identify(homekit_value_t _value) {
-    UDPLGP("Identify\n");
+    UDPLUS("Identify\n");
 //    xTaskCreate(identify_task, "identify", 256, NULL, 2, NULL);
 }
 
@@ -128,7 +128,7 @@ void state_task(void *argv) {
         vTaskDelay(BEAT/portTICK_PERIOD_MS);
         sprintf(status_line,"T=%3d, C=%3d, Ck=%7d, S=%d, move=%d, dir=%2d",
                             target.value.int_value,current.value.int_value,currentk,state.value.int_value,move,direction);
-        if (strcmp(status_line, previous_status)) UDPLOG("%s @%9d0 ms\n",status_line,xTaskGetTickCount());
+        if (strcmp(status_line, previous_status)) UDPLUO("%s @%9d0 ms\n",status_line,xTaskGetTickCount());
         strcpy(previous_status,status_line);
         if (current.value.int_value!=target.value.int_value) { //need to move
             direction=current.value.int_value<target.value.int_value ? 1 : -1;
@@ -157,19 +157,19 @@ void state_task(void *argv) {
 }
 
 void singlepress_callback(uint8_t gpio, void *args) {
-            UDPLGP("single press = stop here\n");
+            UDPLUS("single press = stop here\n");
             target.value.int_value=current.value.int_value;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
 }
 
 void doublepress_callback(uint8_t gpio, void *args) {
-            UDPLGP("double press = go open\n");
+            UDPLUS("double press = go open\n");
             target.value.int_value=100;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
 }
 
 void longpress_callback(uint8_t gpio, void *args) {
-            UDPLGP("long press = go close\n");
+            UDPLUS("long press = go close\n");
             target.value.int_value=0;
             homekit_characteristic_notify(&target,HOMEKIT_UINT8(target.value.int_value));
 }
@@ -225,7 +225,7 @@ homekit_server_config_t config = {
 
 void on_wifi_ready() {
     udplog_init(3);
-    UDPLOG("\n\n\nBasic Curtain Motor 0.3.1\n");
+    UDPLUS("\n\n\nBasic Curtain Motor 0.3.1\n");
 
     motor_init();
     
